@@ -1,10 +1,10 @@
 {
-  "name": "agung-framework",
+  "name": "ozone-project",
   "version": "0.1.0",
   "type": "module",
   "description": "CLI to scaffold Next.js projects using pnpm",
   "bin": {
-    "agung-framework": "./bin/index.js"
+    "ozone-project": "./bin/index.js"
   },
   "scripts": {
     "dev": "tsx src/cli.tsx",
