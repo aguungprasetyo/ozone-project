@@ -1,0 +1,36 @@
+{
+  "name": "agung-framework",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "CLI to scaffold Next.js projects using pnpm",
+  "bin": {
+    "agung-framework": "./bin/index.js"
+  },
+  "scripts": {
+    "dev": "tsx src/cli.tsx",
+    "build": "tsc -p tsconfig.json"
+  },
+  "keywords": [
+    "cli",
+    "nextjs",
+    "scaffold",
+    "pnpm",
+    "ink"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "packageManager": "pnpm@10.18.2",
+  "dependencies": {
+    "execa": "^9.6.1",
+    "ink": "^6.6.0",
+    "kleur": "^4.1.5",
+    "ora": "^9.0.0",
+    "react": "^19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "@types/react": "^19.2.7",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
