@@ -1,13 +1,18 @@
-import { execa } from "execa";
+﻿import { execa } from "execa";
 import fs from "fs/promises";
 import path from "path";
+
+type Step = "validate" | "clone" | "install" | "done";
 
 type Options = {
   repoUrl: string;
   targetDir: string;
+  onStep?: (step: Step) => void;
 };
 
-export async function scaffoldProject({ repoUrl, targetDir }: Options) {
+export async function scaffoldProject({ repoUrl, targetDir, onStep }: Options) {
+  onStep?.("validate");
+
   if (!/^[a-z0-9-_]+$/i.test(targetDir)) {
     throw new Error("Invalid project name.");
   }
@@ -25,7 +30,7 @@ export async function scaffoldProject({ repoUrl, targetDir }: Options) {
     throw new Error("pnpm is not installed. Run: npm install -g pnpm");
   }
 
-  console.log("📦 Cloning template...");
+  onStep?.("clone");
   await execa("git", ["clone", "--depth=1", repoUrl, targetDir], {
     stdio: "inherit",
     shell: true
@@ -33,18 +38,12 @@ export async function scaffoldProject({ repoUrl, targetDir }: Options) {
 
   await fs.rm(path.join(absTarget, ".git"), { recursive: true, force: true });
 
-  console.log("📦 Installing dependencies...");
+  onStep?.("install");
   await execa("pnpm", ["install"], {
     cwd: absTarget,
     stdio: "inherit",
     shell: true
   });
 
-  console.log(`
-✅ Project ready!
-
-Next steps:
-  cd ${targetDir}
-  pnpm dev
-`);
+  onStep?.("done");
 }

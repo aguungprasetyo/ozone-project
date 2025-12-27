@@ -2,45 +2,131 @@
 import { Box, Text, useInput } from "ink";
 import { scaffoldProject } from "./steps/scaffold.js";
 
-type Status = "prompt" | "scaffold" | "done" | "error";
+type Status = "promptName" | "chooseTemplate" | "customRepo" | "scaffold" | "done" | "error";
 
-const repoUrl = "https://github.com/aguungprasetyo/project-base";
+type ProgressStep = "validate" | "clone" | "install" | "done";
+
+type Template = {
+  id: string;
+  label: string;
+  repoUrl?: string;
+};
+
+const templates: Template[] = [
+  {
+    id: "default",
+    label: "Next.js (default)",
+    repoUrl: "https://github.com/aguungprasetyo/project-base"
+  },
+  {
+    id: "custom",
+    label: "Custom repo URL"
+  }
+];
+
+const progressLabels: Record<ProgressStep, string> = {
+  validate: "Validating project name",
+  clone: "Cloning template",
+  install: "Installing dependencies",
+  done: "Finalizing"
+};
+
+const spinnerFrames = ["-", "\\", "|", "/"];
 
 export default function App() {
   const argProjectName = process.argv[2];
-  const [input, setInput] = useState(argProjectName ?? "");
+  const [nameInput, setNameInput] = useState(argProjectName ?? "");
+  const [repoInput, setRepoInput] = useState("");
   const [projectName, setProjectName] = useState(argProjectName ?? "");
-  const [status, setStatus] = useState<Status>(argProjectName ? "scaffold" : "prompt");
+  const [repoUrl, setRepoUrl] = useState("");
+  const [status, setStatus] = useState<Status>(argProjectName ? "chooseTemplate" : "promptName");
   const [error, setError] = useState<string | null>(null);
+  const [templateIndex, setTemplateIndex] = useState(0);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const [progress, setProgress] = useState<ProgressStep | null>(null);
+  const [spinnerFrame, setSpinnerFrame] = useState(0);
 
   useInput((inputChar, key) => {
-    if (status !== "prompt") {
-      return;
-    }
-
-    if (key.return) {
-      const trimmed = input.trim();
-      if (!trimmed) {
-        setError("Please provide a project name.");
+    if (status === "promptName") {
+      if (key.return) {
+        const trimmed = nameInput.trim();
+        if (!trimmed) {
+          setError("Please provide a project name.");
+          return;
+        }
+        setError(null);
+        setProjectName(trimmed);
+        setStatus("chooseTemplate");
         return;
       }
-      setError(null);
-      setProjectName(trimmed);
-      setStatus("scaffold");
+
+      if (key.backspace || key.delete) {
+        setNameInput((prev) => prev.slice(0, -1));
+        return;
+      }
+
+      if (key.ctrl || key.meta || key.tab || key.escape) {
+        return;
+      }
+
+      if (inputChar) {
+        setNameInput((prev) => prev + inputChar);
+      }
+
       return;
     }
 
-    if (key.backspace || key.delete) {
-      setInput((prev) => prev.slice(0, -1));
+    if (status === "chooseTemplate") {
+      if (key.upArrow) {
+        setTemplateIndex((prev) => (prev - 1 + templates.length) % templates.length);
+        return;
+      }
+
+      if (key.downArrow) {
+        setTemplateIndex((prev) => (prev + 1) % templates.length);
+        return;
+      }
+
+      if (key.return) {
+        const chosen = templates[templateIndex];
+        setSelectedTemplate(chosen);
+        if (chosen.repoUrl) {
+          setRepoUrl(chosen.repoUrl);
+          setStatus("scaffold");
+        } else {
+          setRepoInput("");
+          setStatus("customRepo");
+        }
+      }
+
       return;
     }
 
-    if (key.ctrl || key.meta || key.tab || key.escape || key.upArrow || key.downArrow || key.leftArrow || key.rightArrow) {
-      return;
-    }
+    if (status === "customRepo") {
+      if (key.return) {
+        const trimmed = repoInput.trim();
+        if (!trimmed) {
+          setError("Please provide a template repo URL.");
+          return;
+        }
+        setError(null);
+        setRepoUrl(trimmed);
+        setStatus("scaffold");
+        return;
+      }
 
-    if (inputChar) {
-      setInput((prev) => prev + inputChar);
+      if (key.backspace || key.delete) {
+        setRepoInput((prev) => prev.slice(0, -1));
+        return;
+      }
+
+      if (key.ctrl || key.meta || key.tab || key.escape) {
+        return;
+      }
+
+      if (inputChar) {
+        setRepoInput((prev) => prev + inputChar);
+      }
     }
   });
 
@@ -49,10 +135,23 @@ export default function App() {
       return;
     }
 
-    const trimmed = projectName.trim();
-    if (!trimmed) {
+    const trimmedName = projectName.trim();
+    if (!trimmedName) {
       setError("Please provide a project name.");
-      setStatus("prompt");
+      setStatus("promptName");
+      return;
+    }
+
+    if (!selectedTemplate) {
+      setError("Please select a template.");
+      setStatus("chooseTemplate");
+      return;
+    }
+
+    const trimmedRepo = repoUrl.trim();
+    if (!trimmedRepo) {
+      setError("Please provide a template repo URL.");
+      setStatus("customRepo");
       return;
     }
 
@@ -60,8 +159,13 @@ export default function App() {
 
     (async () => {
       try {
-        await scaffoldProject({ repoUrl, targetDir: trimmed });
+        await scaffoldProject({
+          repoUrl: trimmedRepo,
+          targetDir: trimmedName,
+          onStep: (step) => setProgress(step)
+        });
         if (!cancelled) {
+          setProgress("done");
           setStatus("done");
         }
       } catch (err) {
@@ -75,13 +179,49 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, [status, projectName]);
+  }, [status, projectName, repoUrl, selectedTemplate]);
 
-  if (status === "prompt") {
+  useEffect(() => {
+    if (status !== "scaffold") {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setSpinnerFrame((prev) => (prev + 1) % spinnerFrames.length);
+    }, 120);
+
+    return () => clearInterval(timer);
+  }, [status]);
+
+  if (status === "promptName") {
     return (
       <Box flexDirection="column">
         <Text>What is the name of your project?</Text>
-        <Text>{"> "}{input}</Text>
+        <Text>{"> "}{nameInput}</Text>
+        {error ? <Text color="red">{error}</Text> : null}
+      </Box>
+    );
+  }
+
+  if (status === "chooseTemplate") {
+    return (
+      <Box flexDirection="column">
+        <Text>Select a template:</Text>
+        {templates.map((template, index) => (
+          <Text key={template.id}>
+            {index === templateIndex ? ">" : " "} {template.label}
+          </Text>
+        ))}
+        <Text>Use up/down arrows and Enter to select.</Text>
+      </Box>
+    );
+  }
+
+  if (status === "customRepo") {
+    return (
+      <Box flexDirection="column">
+        <Text>Template repo URL:</Text>
+        <Text>{"> "}{repoInput}</Text>
         {error ? <Text color="red">{error}</Text> : null}
       </Box>
     );
@@ -97,8 +237,44 @@ export default function App() {
   }
 
   if (status === "done") {
-    return <Text>Project created: {projectName}</Text>;
+    return (
+      <Box flexDirection="column">
+        <Text>Project ready.</Text>
+        <Text>Next steps:</Text>
+        <Text>cd {projectName}</Text>
+        <Text>pnpm dev</Text>
+      </Box>
+    );
   }
 
-  return <Text>Creating project: {projectName}</Text>;
+  const steps = [
+    { id: "validate", label: "Validate project" },
+    { id: "clone", label: "Clone template" },
+    { id: "install", label: "Install dependencies" }
+  ] as const;
+
+  const progressIndex = progress === "done"
+    ? steps.length
+    : progress
+      ? steps.findIndex((step) => step.id === progress)
+      : -1;
+
+  const spinner = spinnerFrames[spinnerFrame];
+  const progressText = progress ? progressLabels[progress] : "Starting";
+
+  return (
+    <Box flexDirection="column">
+      <Text>Project: {projectName}</Text>
+      <Text>Template: {selectedTemplate?.label ?? "Unknown"}</Text>
+      <Text>{spinner} {progressText}</Text>
+      {steps.map((step, index) => {
+        const marker = index < progressIndex ? "[x]" : index === progressIndex ? "[*]" : "[ ]";
+        return (
+          <Text key={step.id}>
+            {marker} {step.label}
+          </Text>
+        );
+      })}
+    </Box>
+  );
 }
