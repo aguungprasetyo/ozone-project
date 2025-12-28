@@ -25,14 +25,14 @@ export async function scaffoldProject({ repoUrl, targetDir, onStep }: Options) {
   } catch {}
 
   try {
-    await execa("pnpm", ["-v"], { shell: true });
+    await execa("pnpm", ["-v"], { shell: true, stdio: "ignore" });
   } catch {
     throw new Error("pnpm is not installed. Run: npm install -g pnpm");
   }
 
   onStep?.("clone");
   await execa("git", ["clone", "--depth=1", repoUrl, targetDir], {
-    stdio: "inherit",
+    stdio: "ignore",
     shell: true
   });
 
@@ -41,7 +41,7 @@ export async function scaffoldProject({ repoUrl, targetDir, onStep }: Options) {
   onStep?.("install");
   await execa("pnpm", ["install"], {
     cwd: absTarget,
-    stdio: "inherit",
+    stdio: "ignore",
     shell: true
   });
 

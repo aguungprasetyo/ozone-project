@@ -1,6 +1,6 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useEffect, useState } from "react";
-import { Box, Text, useInput } from "ink";
+import { Box, Text, useApp, useInput } from "ink";
 import { LoadingSpinner } from "./ui/spinner.js";
 import { scaffoldProject } from "./steps/scaffold.js";
 const templates = [
@@ -21,6 +21,7 @@ const progressLabels = {
     done: "Finalizing"
 };
 export default function App() {
+    const { exit } = useApp();
     const argProjectName = process.argv[2];
     const [nameInput, setNameInput] = useState(argProjectName ?? "");
     const [repoInput, setRepoInput] = useState("");
@@ -80,8 +81,18 @@ export default function App() {
             return;
         }
         if (status === "customRepo") {
+            if (key.escape) {
+                setError(null);
+                setStatus("chooseTemplate");
+                return;
+            }
             if (key.return) {
                 const trimmed = repoInput.trim();
+                if (trimmed.toLowerCase() === "back") {
+                    setError(null);
+                    setStatus("chooseTemplate");
+                    return;
+                }
                 if (!trimmed) {
                     setError("Please provide a template repo URL.");
                     return;
@@ -148,6 +159,16 @@ export default function App() {
             cancelled = true;
         };
     }, [status, projectName, repoUrl, selectedTemplate]);
+    useEffect(() => {
+        if (status !== "done") {
+            return;
+        }
+        const timer = setTimeout(() => {
+            exit();
+            process.exit(0);
+        }, 700);
+        return () => clearTimeout(timer);
+    }, [status, exit]);
     if (status === "promptName") {
         return (_jsxs(Box, { flexDirection: "column", children: [_jsx(Text, { children: "What is the name of your project?" }), _jsxs(Text, { children: ["> ", nameInput] }), error ? _jsx(Text, { color: "red", children: error }) : null] }));
     }
@@ -155,7 +176,7 @@ export default function App() {
         return (_jsxs(Box, { flexDirection: "column", children: [_jsx(Text, { children: "Select a template:" }), templates.map((template, index) => (_jsxs(Text, { children: [index === templateIndex ? ">" : " ", " ", template.label] }, template.id))), _jsx(Text, { children: "Use up/down arrows and Enter to select." })] }));
     }
     if (status === "customRepo") {
-        return (_jsxs(Box, { flexDirection: "column", children: [_jsx(Text, { children: "Template repo URL:" }), _jsxs(Text, { children: ["> ", repoInput] }), error ? _jsx(Text, { color: "red", children: error }) : null] }));
+        return (_jsxs(Box, { flexDirection: "column", children: [_jsx(Text, { children: "Template repo URL:" }), _jsxs(Text, { children: ["> ", repoInput] }), _jsx(Text, { children: "Press Esc or type \"back\" to return." }), error ? _jsx(Text, { color: "red", children: error }) : null] }));
     }
     if (status === "error") {
         return (_jsxs(Box, { flexDirection: "column", children: [_jsx(Text, { color: "red", children: "Scaffolding failed." }), error ? _jsx(Text, { color: "red", children: error }) : null] }));

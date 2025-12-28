@@ -102,8 +102,19 @@ export default function App() {
     }
 
     if (status === "customRepo") {
+      if (key.escape) {
+        setError(null);
+        setStatus("chooseTemplate");
+        return;
+      }
+
       if (key.return) {
         const trimmed = repoInput.trim();
+        if (trimmed.toLowerCase() === "back") {
+          setError(null);
+          setStatus("chooseTemplate");
+          return;
+        }
         if (!trimmed) {
           setError("Please provide a template repo URL.");
           return;
@@ -187,6 +198,7 @@ export default function App() {
 
     const timer = setTimeout(() => {
       exit();
+      process.exit(0);
     }, 700);
 
     return () => clearTimeout(timer);
@@ -220,6 +232,7 @@ export default function App() {
       <Box flexDirection="column">
         <Text>Template repo URL:</Text>
         <Text>{"> "}{repoInput}</Text>
+        <Text>Press Esc or type "back" to return.</Text>
         {error ? <Text color="red">{error}</Text> : null}
       </Box>
     );
