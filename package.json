@@ -1,6 +1,6 @@
 {
   "name": "ozone-project",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "CLI to scaffold Next.js projects using pnpm",
   "bin": {
@@ -17,7 +17,7 @@
     "pnpm",
     "ink"
   ],
-  "author": "Your Name",
+  "author": "Ozone Digiverse",
   "license": "MIT",
   "packageManager": "pnpm@10.18.2",
   "dependencies": {

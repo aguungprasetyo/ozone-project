@@ -8,10 +8,18 @@ Scaffold a Next.js project from the terminal with an interactive Ink UI.
 npx ozone-project my-app
 ```
 
+```bash
+pnpm dlx ozone-project my-app
+```
+
 Run without a name to be prompted:
 
 ```bash
 npx ozone-project
+```
+
+```bash
+pnpm dlx ozone-project
 ```
 
 ## What it does
