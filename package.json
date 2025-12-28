@@ -4,7 +4,7 @@
   "type": "module",
   "description": "CLI to scaffold Next.js projects using pnpm",
   "bin": {
-    "ozone-project": "bin/index.js"
+    "ozone-digiverse": "bin/index.js"
   },
   "scripts": {
     "dev": "tsx src/cli.tsx",
