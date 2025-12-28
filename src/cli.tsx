@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState } from "react";
-import { Box, Text, useInput } from "ink";
+import { Box, Text, useApp, useInput } from "ink";
 import { LoadingSpinner } from "./ui/spinner.js";
 import { scaffoldProject } from "./steps/scaffold.js";
 
@@ -33,6 +33,7 @@ const progressLabels: Record<ProgressStep, string> = {
 };
 
 export default function App() {
+  const { exit } = useApp();
   const argProjectName = process.argv[2];
   const [nameInput, setNameInput] = useState(argProjectName ?? "");
   const [repoInput, setRepoInput] = useState("");
@@ -178,6 +179,18 @@ export default function App() {
       cancelled = true;
     };
   }, [status, projectName, repoUrl, selectedTemplate]);
+
+  useEffect(() => {
+    if (status !== "done") {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      exit();
+    }, 700);
+
+    return () => clearTimeout(timer);
+  }, [status, exit]);
   if (status === "promptName") {
     return (
       <Box flexDirection="column">

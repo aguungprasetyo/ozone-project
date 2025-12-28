@@ -1,25 +1,25 @@
-# ozone-project
+# ozone-digiverse
 
 Scaffold a Next.js project from the terminal with an interactive Ink UI.
 
 ## Usage
 
 ```bash
-npx ozone-project my-app
+npx ozone-digiverse app-name
 ```
 
 ```bash
-pnpm dlx ozone-project my-app
+pnpm dlx ozone-digiverse app-name
 ```
 
 Run without a name to be prompted:
 
 ```bash
-npx ozone-project
+npx ozone-digiverse
 ```
 
 ```bash
-pnpm dlx ozone-project
+pnpm dlx ozone-digiverse
 ```
 
 ## What it does

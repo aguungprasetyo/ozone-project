@@ -1,10 +1,10 @@
 {
-  "name": "ozone-project",
+  "name": "ozone-digiverse",
   "version": "0.1.1",
   "type": "module",
   "description": "CLI to scaffold Next.js projects using pnpm",
   "bin": {
-    "ozone-project": "./bin/index.js"
+    "ozone-project": "bin/index.js"
   },
   "scripts": {
     "dev": "tsx src/cli.tsx",
