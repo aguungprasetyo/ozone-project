@@ -1,6 +1,6 @@
 {
   "name": "ozone-digiverse",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "CLI to scaffold Next.js projects using pnpm",
   "bin": {
