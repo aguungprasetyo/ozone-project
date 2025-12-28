@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useState } from "react";
 import { Box, Text, useInput } from "ink";
+import { LoadingSpinner } from "./ui/spinner.js";
 import { scaffoldProject } from "./steps/scaffold.js";
 
 type Status = "promptName" | "chooseTemplate" | "customRepo" | "scaffold" | "done" | "error";
@@ -31,8 +32,6 @@ const progressLabels: Record<ProgressStep, string> = {
   done: "Finalizing"
 };
 
-const spinnerFrames = ["-", "\\", "|", "/"];
-
 export default function App() {
   const argProjectName = process.argv[2];
   const [nameInput, setNameInput] = useState(argProjectName ?? "");
@@ -44,7 +43,6 @@ export default function App() {
   const [templateIndex, setTemplateIndex] = useState(0);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [progress, setProgress] = useState<ProgressStep | null>(null);
-  const [spinnerFrame, setSpinnerFrame] = useState(0);
 
   useInput((inputChar, key) => {
     if (status === "promptName") {
@@ -180,19 +178,6 @@ export default function App() {
       cancelled = true;
     };
   }, [status, projectName, repoUrl, selectedTemplate]);
-
-  useEffect(() => {
-    if (status !== "scaffold") {
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setSpinnerFrame((prev) => (prev + 1) % spinnerFrames.length);
-    }, 120);
-
-    return () => clearInterval(timer);
-  }, [status]);
-
   if (status === "promptName") {
     return (
       <Box flexDirection="column">
@@ -259,14 +244,13 @@ export default function App() {
       ? steps.findIndex((step) => step.id === progress)
       : -1;
 
-  const spinner = spinnerFrames[spinnerFrame];
   const progressText = progress ? progressLabels[progress] : "Starting";
 
   return (
     <Box flexDirection="column">
       <Text>Project: {projectName}</Text>
       <Text>Template: {selectedTemplate?.label ?? "Unknown"}</Text>
-      <Text>{spinner} {progressText}</Text>
+      <LoadingSpinner label={progressText} />
       {steps.map((step, index) => {
         const marker = index < progressIndex ? "[x]" : index === progressIndex ? "[*]" : "[ ]";
         return (

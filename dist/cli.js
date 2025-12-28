@@ -1,6 +1,7 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useEffect, useState } from "react";
 import { Box, Text, useInput } from "ink";
+import { LoadingSpinner } from "./ui/spinner.js";
 import { scaffoldProject } from "./steps/scaffold.js";
 const templates = [
     {
@@ -19,7 +20,6 @@ const progressLabels = {
     install: "Installing dependencies",
     done: "Finalizing"
 };
-const spinnerFrames = ["-", "\\", "|", "/"];
 export default function App() {
     const argProjectName = process.argv[2];
     const [nameInput, setNameInput] = useState(argProjectName ?? "");
@@ -31,7 +31,6 @@ export default function App() {
     const [templateIndex, setTemplateIndex] = useState(0);
     const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [progress, setProgress] = useState(null);
-    const [spinnerFrame, setSpinnerFrame] = useState(0);
     useInput((inputChar, key) => {
         if (status === "promptName") {
             if (key.return) {
@@ -149,15 +148,6 @@ export default function App() {
             cancelled = true;
         };
     }, [status, projectName, repoUrl, selectedTemplate]);
-    useEffect(() => {
-        if (status !== "scaffold") {
-            return;
-        }
-        const timer = setInterval(() => {
-            setSpinnerFrame((prev) => (prev + 1) % spinnerFrames.length);
-        }, 120);
-        return () => clearInterval(timer);
-    }, [status]);
     if (status === "promptName") {
         return (_jsxs(Box, { flexDirection: "column", children: [_jsx(Text, { children: "What is the name of your project?" }), _jsxs(Text, { children: ["> ", nameInput] }), error ? _jsx(Text, { color: "red", children: error }) : null] }));
     }
@@ -183,9 +173,8 @@ export default function App() {
         : progress
             ? steps.findIndex((step) => step.id === progress)
             : -1;
-    const spinner = spinnerFrames[spinnerFrame];
     const progressText = progress ? progressLabels[progress] : "Starting";
-    return (_jsxs(Box, { flexDirection: "column", children: [_jsxs(Text, { children: ["Project: ", projectName] }), _jsxs(Text, { children: ["Template: ", selectedTemplate?.label ?? "Unknown"] }), _jsxs(Text, { children: [spinner, " ", progressText] }), steps.map((step, index) => {
+    return (_jsxs(Box, { flexDirection: "column", children: [_jsxs(Text, { children: ["Project: ", projectName] }), _jsxs(Text, { children: ["Template: ", selectedTemplate?.label ?? "Unknown"] }), _jsx(LoadingSpinner, { label: progressText }), steps.map((step, index) => {
                 const marker = index < progressIndex ? "[x]" : index === progressIndex ? "[*]" : "[ ]";
                 return (_jsxs(Text, { children: [marker, " ", step.label] }, step.id));
             })] }));
