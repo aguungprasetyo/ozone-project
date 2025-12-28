@@ -257,7 +257,7 @@ export default function App() {
   if (status === "done") {
     return (
       <Box flexDirection="column">
-        <Text>Project ready.</Text>
+        <Text color="green">Project ready.</Text>
         <Text>Next steps:</Text>
         <Text>cd {projectName}</Text>
         <Text>pnpm dev</Text>
