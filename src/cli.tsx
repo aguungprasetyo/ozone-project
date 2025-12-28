@@ -217,11 +217,18 @@ export default function App() {
     return (
       <Box flexDirection="column">
         <Text>Select a template:</Text>
-        {templates.map((template, index) => (
-          <Text key={template.id}>
-            {index === templateIndex ? ">" : " "} {template.label}
-          </Text>
-        ))}
+        {templates.map((template, index) => {
+          const isSelected = index === templateIndex;
+          return (
+            <Text
+              key={template.id}
+              backgroundColor={isSelected ? "white" : undefined}
+              color={isSelected ? "black" : undefined}
+            >
+              {isSelected ? ">" : " "} {template.label}
+            </Text>
+          );
+        })}
         <Text>Use up/down arrows and Enter to select.</Text>
       </Box>
     );
@@ -278,9 +285,12 @@ export default function App() {
       <Text>Template: {selectedTemplate?.label ?? "Unknown"}</Text>
       <LoadingSpinner label={progressText} />
       {steps.map((step, index) => {
-        const marker = index < progressIndex ? "[x]" : index === progressIndex ? "[*]" : "[ ]";
+        const isDone = index < progressIndex;
+        const isCurrent = index === progressIndex;
+        const marker = isDone ? "✔" : isCurrent ? "●" : "○";
+        const color = isDone ? "green" : isCurrent ? "blue" : "gray";
         return (
-          <Text key={step.id}>
+          <Text key={step.id} color={color}>
             {marker} {step.label}
           </Text>
         );
