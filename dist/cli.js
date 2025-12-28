@@ -185,7 +185,7 @@ export default function App() {
         return (_jsxs(Box, { flexDirection: "column", children: [_jsx(Text, { color: "red", children: "Scaffolding failed." }), error ? _jsx(Text, { color: "red", children: error }) : null] }));
     }
     if (status === "done") {
-        return (_jsxs(Box, { flexDirection: "column", children: [_jsx(Text, { children: "Project ready." }), _jsx(Text, { children: "Next steps:" }), _jsxs(Text, { children: ["cd ", projectName] }), _jsx(Text, { children: "pnpm dev" })] }));
+        return (_jsxs(Box, { flexDirection: "column", children: [_jsx(Text, { color: "green", children: "Project ready." }), _jsx(Text, { children: "Next steps:" }), _jsxs(Text, { children: ["cd ", projectName] }), _jsx(Text, { children: "pnpm dev" })] }));
     }
     const steps = [
         { id: "validate", label: "Validate project" },
