@@ -173,7 +173,10 @@ export default function App() {
         return (_jsxs(Box, { flexDirection: "column", children: [_jsx(Text, { children: "What is the name of your project?" }), _jsxs(Text, { children: ["> ", nameInput] }), error ? _jsx(Text, { color: "red", children: error }) : null] }));
     }
     if (status === "chooseTemplate") {
-        return (_jsxs(Box, { flexDirection: "column", children: [_jsx(Text, { children: "Select a template:" }), templates.map((template, index) => (_jsxs(Text, { children: [index === templateIndex ? ">" : " ", " ", template.label] }, template.id))), _jsx(Text, { children: "Use up/down arrows and Enter to select." })] }));
+        return (_jsxs(Box, { flexDirection: "column", children: [_jsx(Text, { children: "Select a template:" }), templates.map((template, index) => {
+                    const isSelected = index === templateIndex;
+                    return (_jsxs(Text, { backgroundColor: isSelected ? "white" : undefined, color: isSelected ? "black" : undefined, children: [isSelected ? ">" : " ", " ", template.label] }, template.id));
+                }), _jsx(Text, { children: "Use up/down arrows and Enter to select." })] }));
     }
     if (status === "customRepo") {
         return (_jsxs(Box, { flexDirection: "column", children: [_jsx(Text, { children: "Template repo URL:" }), _jsxs(Text, { children: ["> ", repoInput] }), _jsx(Text, { children: "Press Esc or type \"back\" to return." }), error ? _jsx(Text, { color: "red", children: error }) : null] }));
@@ -196,7 +199,10 @@ export default function App() {
             : -1;
     const progressText = progress ? progressLabels[progress] : "Starting";
     return (_jsxs(Box, { flexDirection: "column", children: [_jsxs(Text, { children: ["Project: ", projectName] }), _jsxs(Text, { children: ["Template: ", selectedTemplate?.label ?? "Unknown"] }), _jsx(LoadingSpinner, { label: progressText }), steps.map((step, index) => {
-                const marker = index < progressIndex ? "[x]" : index === progressIndex ? "[*]" : "[ ]";
-                return (_jsxs(Text, { children: [marker, " ", step.label] }, step.id));
+                const isDone = index < progressIndex;
+                const isCurrent = index === progressIndex;
+                const marker = isDone ? "✔" : isCurrent ? "●" : "○";
+                const color = isDone ? "green" : isCurrent ? "blue" : "gray";
+                return (_jsxs(Text, { color: color, children: [marker, " ", step.label] }, step.id));
             })] }));
 }
